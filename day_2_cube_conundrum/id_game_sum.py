@@ -1,4 +1,4 @@
-data = open("Day-2-Cube-Conundrum/data.txt")
+data = open("day_2_cube_conundrum/data.txt")
 sum = 0
 
 max_red = 12

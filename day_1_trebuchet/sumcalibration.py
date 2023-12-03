@@ -1,4 +1,4 @@
-data = open("Day-1-Trebuchet/data.txt")
+data = open("day_1_trebuchet/data.txt")
 sum = 0
 digits = [
     "one",
