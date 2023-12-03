@@ -1,87 +1,42 @@
-data = open("day_3_gear_ratios/data.txt")
-sum = 0
+import math as m
 
-SYMBOLS = ["@", "#", "$", "%", "&", "*", "-", "=", "+", "/"]
-prev_line = ""
-prev_char = ""
-check_part = {}
-list_parts = {}
+# Open the file and read the lines into a list called 'board'
+board = list(open("day_3_gear_ratios/data.txt"))
 
+# Create a dictionary to store characters that are not numbers or dots
+chars = {
+    (r, c): []
+    for r in range(140)
+    for c in range(140)
+    if board[r][c] not in "01234566789."
+}
 
-f = open("day_3_gear_ratios/test_data.txt", "w")
-passed_parts = {}
-for idx, line in enumerate(data):
-    cur_num = ""
-    list_parts = dict(check_part)
-    check_part = {}
-    start_idx = -1
-    end_idx = -1
-    log = line
-    for idx_char, char in enumerate(line):
-        if char.isnumeric():
-            if start_idx == -1:
-                start_idx = idx_char
-            cur_num += char
-        elif cur_num:
-            end_idx = idx_char
-            # print(idx_char, char, start_idx, end_idx)
-            list_parts.update(
-                {cur_num: {"start": start_idx, "end": end_idx, "idx": idx}}
-            )
-            start_idx = -1
-            cur_num = ""
-        prev_char = char
-    for part in list_parts:
-        adj_prev = prev_line[
-            list_parts[part]["start"] - 1
-            if list_parts[part]["start"] != 0
-            else 0 : list_parts[part]["end"] + 1
-        ]
-        adj_line = line[
-            list_parts[part]["start"] - 1
-            if list_parts[part]["start"] != 0
-            else 0 : list_parts[part]["end"] + 1
-        ]
-        # print(adj_prev,part,part in adj_prev or part in adj_line)
-        # print(adj_line,part,part in adj_prev or part in adj_line)
-        if any(num in adj_prev or num in adj_line for num in SYMBOLS) and (
-            part in adj_prev or part in adj_line
-        ):
-            # print(adj_prev)
-            # print(adj_line)
-            # print("Passed!!!!!", {part: list_parts.get(part)})
-            passed_parts.update({part: list_parts.get(part)})
-            sum += int(part)
-        elif part in adj_prev or part in adj_line:
-            # print(adj_prev)
-            # print(adj_line)
-            # print("Failed", {part: list_parts.get(part)})
-            # Add part to check next line
-            check_part.update({part: list_parts.get(part)})
-        # else:
-        #     print(adj_prev, part)
-        #     print(adj_line, part)
-    prev_line = line.strip()
+# Iterate over each row and character in the board
+for r, row in enumerate(board):
+    # Initialize an empty string to keep track of consecutive digits
+    consecutive_digits = ""
+    for c, char in enumerate(row):
+        # Check if the character is a digit
+        if char.isdigit():
+            # If it is, add it to the string of consecutive digits
+            consecutive_digits += char
+        elif consecutive_digits:
+            # If the current character is not a digit and we have
+            # consecutive digits, process them
+            start = c - len(consecutive_digits) - 1
+            end = c + 1
+            edge = {(r, c) for r in (r - 1, r, r + 1) for c in range(start, end)}
 
-# print(passed_parts)
+            # Add the integer value of the consecutive digits to the
+            # corresponding positions in the 'chars' dictionary
+            for o in edge & chars.keys():
+                chars[o].append(int(consecutive_digits))
+            # Reset the string of consecutive digits
+            consecutive_digits = ""
 
-data.seek(0)
-for idx, line in enumerate(data):
-    log = line
-    for part in passed_parts:
-        if idx == passed_parts[part]["idx"]:
-            # print({part: passed_parts.get(part)})
-            re = ""
-            for _ in part:
-                re += "."
-            log = (
-                log[: passed_parts[part]["start"]]
-                + re
-                + log[passed_parts[part]["end"] :]
-            )
-    f.write(log)
+# Calculate the sum of sums and the product of pairs
+sum_of_sums = sum(sum(p) for p in chars.values())
+product_of_pairs = sum(m.prod(p) for p in chars.values() if len(p) == 2)
 
-f.close()
-
-print(sum)
-data.close()
+# Print the results
+print(sum_of_sums, product_of_pairs)
