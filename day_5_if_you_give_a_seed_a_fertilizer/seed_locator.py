@@ -1,43 +1,47 @@
 from functools import reduce
 
-data = {}
-current_category = None
-
-with open("day_5_if_you_give_a_seed_a_fertilizer/data.txt", "r") as file:
-    for line in file:
-        # Strip leading and trailing whitespaces
-        line = line.strip()
-
-        # Check if the line is a category line
-        if ":" in line:
-            current_category = line.split(":")[0]
-            # Initialize the list for the current category
-            data[current_category] = []
-            if line.split(":")[1]:
-                items = [int(item) for item in line.split() if item.isdigit()]
-                data[current_category].extend(items)
-        elif current_category is not None:
-            # If it's not a category line and a category is set, process the items
-            items = [int(item) for item in line.split()]
-            if items:
-                data[current_category].append(items)
+# Read the data from the file and split it into seeds and mappings
+seeds, *mappings = (
+    open("day_5_if_you_give_a_seed_a_fertilizer/data.txt").read().split("\n\n")
+)
+# Convert the seeds from strings to integers
+seeds = list(map(int, seeds.split()[1:]))
 
 
-def lookup(val, m):
-    _, ranges = m
-    print(_, ranges)
-    for r in ranges:
-        print(r,_)
-        dst, src, n = r
-        if src <= val < src + n:
-            print(val - src + dst)
-            return val - src + dst
-        else:
-            # print(val)
-            return val
+# Define a function that looks up the new positions and lengths after applying the mapping
+def lookup(inputs, mapping):
+    # Iterate over each input pair of start position and length
+    for start, length in inputs:
+        # Continue until the entire length has been mapped
+        while length > 0:
+            # Iterate over each mapping rule
+            for m in mapping.split("\n")[1:]:
+                # Extract the destination, source, and length from the mapping rule
+                dst, src, len = map(int, m.split())
+                # Calculate the difference between the current start and the source
+                delta = start - src
+                # Check if the current start is within the range of the mapping rule
+                if delta in range(len):
+                    # Adjust the length based on the delta and remaining length
+                    len = min(len - delta, length)
+                    # Yield the new position and length
+                    yield (dst + delta, len)
+                    # Update the start and length for the next iteration
+                    start += len
+                    length -= len
+                    break
+            # If no mapping rule applies, yield the current position and length
+            else:
+                yield (start, length)
+                break
 
-# print(list(data.items())[1:])
-for s in list(data.items())[0][-1]:
-    reduce_maps = reduce(lookup, list(data.items())[1:], int(s))
-    print(reduce_maps)
 
+# Print the minimum destination position for each seed after applying the mappings
+# The first list comprehension applies the mappings to each seed individually
+# The second list comprehension applies the mappings to pairs of seeds
+print(
+    *[
+        min(reduce(lookup, mappings, s))[0]
+        for s in [zip(seeds, [1] * len(seeds)), zip(seeds[0::2], seeds[1::2])]
+    ]
+)
