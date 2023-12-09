@@ -10,14 +10,23 @@ for nodes in maps:
 
 path_found = False
 steps = 0
-node = 'AAA'
+nodes = [node for node in result_dict if node[-1]=='A']
+print(nodes)
 binary_sequence = ''.join('1' if char == 'R' else '0' for char in sequence)
 print(binary_sequence)
 while not path_found:
-    node =  result_dict[node][binary_sequence[steps]]
+    step=steps % len(binary_sequence)
+    #print(step)
+    nodes = [result_dict[node][int(binary_sequence[step])] for node in nodes]
     steps += 1
-    if node == "ZZZ":
+    found_nodes=0
+    for node in nodes:
+        if node[-1]=='Z':
+            found_nodes+=1
+    #if(found_nodes):
+        #print(found_nodes)
+    if found_nodes==len(nodes):
         path_found = True
-        print("Path found in ", steps, "steps")
+        print("Path found in", steps, "steps")
 print(len(result_dict))
 # print(maps)
