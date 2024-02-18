@@ -1,28 +1,26 @@
-data = "data.txt"
-
-
 def decode(message_file):
-    # Open the message file
+    # Open and read message file lines
     with open(message_file, "r") as file:
-        # Read all lines from the file
         lines = file.readlines()
 
-        # Create a dictionary mapping numbers to words from the lines
-        message_dict = {int(line.split()[0]): line.split()[1] for line in lines}
+    # Create a dictionary mapping index to word
+    index_word_map = {int(line.split()[0]): line.split()[1] for line in lines}
 
-        # Calculate the height of the pyramid based on the number of lines
-        pyramid_height = int((-1 + (1 + 8 * len(lines)) ** 0.5) / 2)
+    # Initialize the decoded message and counters
+    message = []
+    line_end = 0
+    increment = 1
 
-        # Calculate the numbers at the end of each line of the pyramid
-        pyramid_endings = [int((n * (n + 1)) / 2) for n in range(1, pyramid_height + 1)]
+    # Iterate through the dictionary in a pyramid structure
+    # The pyramid structure increases by 1 with each step (like 1, 2, 4, 7, etc.)
+    while line_end < len(index_word_map):
+        line_end += increment
+        message.append(index_word_map[line_end])
+        increment += 1
+        
+    # Join the decoded words into a single string and return
+    return " ".join(message)
 
-        # Construct the decoded message by retrieving words from the dictionary
-        message = " ".join([message_dict[i] for i in pyramid_endings])
 
-    return message
-
-
-
-
-
+data = "data.txt"
 print(decode(data))
